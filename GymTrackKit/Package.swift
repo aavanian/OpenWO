@@ -14,11 +14,25 @@ let package = Package(
     targets: [
         .target(
             name: "GymTrackKit",
-            dependencies: [.product(name: "GRDB", package: "GRDB.swift")]
+            dependencies: [.product(name: "GRDB", package: "GRDB.swift")],
+            exclude: {
+                #if os(Linux)
+                return ["Views", "Utilities/PlatformColors.swift", "ViewModels"]
+                #else
+                return []
+                #endif
+            }()
         ),
         .testTarget(
             name: "GymTrackKitTests",
-            dependencies: ["GymTrackKit"]
+            dependencies: ["GymTrackKit"],
+            exclude: {
+                #if os(Linux)
+                return ["ExerciseViewModelTests.swift", "HomeViewModelTests.swift"]
+                #else
+                return []
+                #endif
+            }()
         ),
     ]
 )
