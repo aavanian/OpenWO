@@ -1,0 +1,34 @@
+name: GymTrack
+options:
+  bundleIdPrefix: com.gymtrack
+  deploymentTarget:
+    iOS: "16.0"
+
+packages:
+  GymTrackKit:
+    path: ../GymTrackKit
+
+targets:
+  GymTrack:
+    type: application
+    platform: iOS
+    sources:
+      - GymTrack
+    dependencies:
+      - package: GymTrackKit
+    settings:
+      base:
+        INFOPLIST_FILE: GymTrack/Info.plist
+        CODE_SIGN_ENTITLEMENTS: GymTrack/GymTrack.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.gymtrack.app
+    entitlements:
+      path: GymTrack/GymTrack.entitlements
+      properties: {}
+
+  GymTrackTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - GymTrackTests
+    dependencies:
+      - target: GymTrack

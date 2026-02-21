@@ -1,0 +1,16 @@
+# Generated Xcode project (regenerate with `cd GymTrackApp && xcodegen generate`)
+GymTrackApp/GymTrack.xcodeproj/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+GymTrackKit/.build/
+GymTrackKit/.swiftpm/
+
+# Xcode
+*.xcuserdata/
+DerivedData/
+xcuserdata/
+
+# macOS
+.DS_Store
