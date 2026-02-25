@@ -110,6 +110,118 @@ final class QueriesTests: XCTestCase {
         XCTAssertNil(challenge)
     }
 
+    // MARK: - Session Feedback
+
+    func testInsertSessionWithFeedback() throws {
+        let session = try Queries.insertSession(
+            db,
+            type: .a,
+            date: "2026-02-25",
+            startedAt: "2026-02-25T08:00:00",
+            durationSeconds: 2400,
+            feedback: .hard
+        )
+        XCTAssertEqual(session.feedback, "hard")
+
+        let fetched = try Queries.lastSession(db)
+        XCTAssertEqual(fetched?.feedback, "hard")
+    }
+
+    func testInsertSessionWithoutFeedback() throws {
+        let session = try Queries.insertSession(
+            db,
+            type: .b,
+            date: "2026-02-25",
+            startedAt: "2026-02-25T08:00:00",
+            durationSeconds: 2400
+        )
+        XCTAssertNil(session.feedback)
+    }
+
+    // MARK: - Exercise Logs
+
+    func testInsertExerciseLogs() throws {
+        let session = try Queries.insertSession(
+            db,
+            type: .a,
+            date: "2026-02-25",
+            startedAt: "2026-02-25T08:00:00",
+            durationSeconds: 2400
+        )
+
+        let workout = try Queries.workoutByName(db, name: "Day A")!
+        let entries = try Queries.exercisesForWorkout(db, workoutId: workout.id!)
+        let rowsExercise = entries[2] // Dumbbell rows, workoutExercise position 2
+
+        let logs = [
+            ExerciseLog(
+                sessionId: session.id!,
+                workoutExerciseId: rowsExercise.1.id!,
+                weight: 12.5,
+                failed: false
+            )
+        ]
+        try Queries.insertExerciseLogs(db, sessionId: session.id!, logs: logs)
+
+        let count = try db.dbWriter.read { dbConn in
+            try Int.fetchOne(dbConn, sql: "SELECT COUNT(*) FROM exerciseLog")
+        }
+        XCTAssertEqual(count, 1)
+    }
+
+    func testLastWeightsReturnsCorrectValues() throws {
+        let workout = try Queries.workoutByName(db, name: "Day A")!
+        let entries = try Queries.exercisesForWorkout(db, workoutId: workout.id!)
+        let rowsWE = entries[2].1 // Dumbbell rows
+        let chestWE = entries[3].1 // Chest press
+
+        // Session 1 with weights
+        let s1 = try Queries.insertSession(
+            db, type: .a, date: "2026-02-20",
+            startedAt: "2026-02-20T08:00:00", durationSeconds: 2400
+        )
+        try Queries.insertExerciseLogs(db, sessionId: s1.id!, logs: [
+            ExerciseLog(sessionId: s1.id!, workoutExerciseId: rowsWE.id!, weight: 10.0),
+            ExerciseLog(sessionId: s1.id!, workoutExerciseId: chestWE.id!, weight: 15.0),
+        ])
+
+        // Session 2 with updated weight for rows only
+        let s2 = try Queries.insertSession(
+            db, type: .a, date: "2026-02-22",
+            startedAt: "2026-02-22T08:00:00", durationSeconds: 2400
+        )
+        try Queries.insertExerciseLogs(db, sessionId: s2.id!, logs: [
+            ExerciseLog(sessionId: s2.id!, workoutExerciseId: rowsWE.id!, weight: 12.5),
+        ])
+
+        let weights = try Queries.lastWeights(db, forWorkoutId: workout.id!)
+        XCTAssertEqual(weights[rowsWE.id!], 12.5)
+        XCTAssertEqual(weights[chestWE.id!], 15.0)
+    }
+
+    func testLastWeightsCarriesAcrossWorkouts() throws {
+        // Log weight for Dumbbell rows (exerciseId=3) in Day A
+        let dayA = try Queries.workoutByName(db, name: "Day A")!
+        let dayAEntries = try Queries.exercisesForWorkout(db, workoutId: dayA.id!)
+        let dayARowsWE = dayAEntries[2].1 // Dumbbell rows in Day A
+
+        let s1 = try Queries.insertSession(
+            db, type: .a, date: "2026-02-20",
+            startedAt: "2026-02-20T08:00:00", durationSeconds: 2400
+        )
+        try Queries.insertExerciseLogs(db, sessionId: s1.id!, logs: [
+            ExerciseLog(sessionId: s1.id!, workoutExerciseId: dayARowsWE.id!, weight: 14.0),
+        ])
+
+        // Query Day C — Dumbbell rows (same exerciseId=3) should get 14.0
+        let dayC = try Queries.workoutByName(db, name: "Day C")!
+        let dayCEntries = try Queries.exercisesForWorkout(db, workoutId: dayC.id!)
+        let dayCRowsWE = dayCEntries[2].1 // Dumbbell rows in Day C
+
+        let weights = try Queries.lastWeights(db, forWorkoutId: dayC.id!)
+        XCTAssertEqual(weights[dayCRowsWE.id!], 14.0)
+    }
+
     // MARK: - Workouts & Exercises
 
     func testAllWorkouts() throws {

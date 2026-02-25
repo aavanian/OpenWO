@@ -156,6 +156,29 @@ public final class AppDatabase {
             }
         }
 
+        migrator.registerMigration("v3") { db in
+            try db.alter(table: "exercise") { t in
+                t.add(column: "hasWeight", .boolean).notNull().defaults(to: false)
+            }
+            try db.execute(sql: "UPDATE exercise SET hasWeight = 1 WHERE id IN (3, 4, 5, 6)")
+
+            try db.alter(table: "session") { t in
+                t.add(column: "feedback", .text)
+            }
+
+            try db.create(table: "exerciseLog") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("sessionId", .integer).notNull()
+                    .references("session", onDelete: .cascade)
+                t.column("workoutExerciseId", .integer).notNull()
+                    .references("workoutExercise", onDelete: .cascade)
+                t.column("weight", .double)
+                t.column("failed", .integer).notNull().defaults(to: 0)
+                t.column("achievedValue", .integer)
+                t.uniqueKey(["sessionId", "workoutExerciseId"])
+            }
+        }
+
         return migrator
     }
 

@@ -5,6 +5,8 @@ struct ExerciseView: View {
     let onFinish: () -> Void
 
     @State private var showPartialConfirmation = false
+    @State private var showAbortConfirmation = false
+    @State private var showFeedbackSheet = false
 
     var body: some View {
         NavigationStack {
@@ -15,9 +17,19 @@ struct ExerciseView: View {
                             ExerciseStepCard(
                                 exercise: exercise,
                                 isCompleted: viewModel.completedSteps.contains(exercise.id),
+                                logEntry: viewModel.exerciseLogs[exercise.id],
                                 onComplete: {
                                     viewModel.markStepCompleted(exercise.id)
                                     Haptics.light()
+                                },
+                                onWeightChanged: { weight in
+                                    viewModel.setWeight(exercise.id, weight: weight)
+                                },
+                                onFailed: { achieved in
+                                    viewModel.markFailed(exercise.id, achievedValue: achieved)
+                                },
+                                onClearFailure: {
+                                    viewModel.clearFailure(exercise.id)
                                 }
                             )
                         }
@@ -41,19 +53,41 @@ struct ExerciseView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Abort", role: .destructive) {
+                        showAbortConfirmation = true
+                    }
+                    .foregroundStyle(.red)
+                }
             }
             .onAppear {
                 viewModel.startTimer()
             }
             .alert("Log as partial session?", isPresented: $showPartialConfirmation) {
                 Button("Yes") {
-                    viewModel.finishWorkout()
-                    Haptics.success()
-                    onFinish()
+                    showFeedbackSheet = true
                 }
                 Button("No", role: .cancel) {}
             } message: {
                 Text("You've completed less than half the exercises.")
+            }
+            .alert("Abort workout?", isPresented: $showAbortConfirmation) {
+                Button("Abort", role: .destructive) {
+                    viewModel.abortWorkout()
+                    onFinish()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This workout will not be saved.")
+            }
+            .sheet(isPresented: $showFeedbackSheet) {
+                WorkoutFeedbackSheet(defaultFeedback: viewModel.defaultFeedback) { feedback in
+                    showFeedbackSheet = false
+                    viewModel.finishWorkout(feedback: feedback)
+                    Haptics.success()
+                    onFinish()
+                }
+                .presentationDetents([.medium])
             }
         }
     }
@@ -63,9 +97,7 @@ struct ExerciseView: View {
             if viewModel.isPartialSession {
                 showPartialConfirmation = true
             } else {
-                viewModel.finishWorkout()
-                Haptics.success()
-                onFinish()
+                showFeedbackSheet = true
             }
         } label: {
             Text("Finish workout")

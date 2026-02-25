@@ -18,7 +18,10 @@ public enum WorkoutPlan {
                 sets: we.sets > 1 ? we.sets : nil,
                 reps: repsLabel,
                 isDailyChallenge: record.isDailyChallenge,
-                isTimed: record.isTimed
+                isTimed: record.isTimed,
+                hasWeight: record.hasWeight,
+                workoutExerciseId: we.id!,
+                counterSeconds: record.isTimed ? value : nil
             )
         }
     }

@@ -57,12 +57,13 @@ final class ExerciseViewModelTests: XCTestCase {
             vm.markStepCompleted(exercise.id)
         }
 
-        vm.finishWorkout()
+        vm.finishWorkout(feedback: .ok)
 
         let session = try Queries.lastSession(db)
         XCTAssertNotNil(session)
         XCTAssertEqual(session?.sessionType, "B")
         XCTAssertFalse(session?.isPartial ?? true)
+        XCTAssertEqual(session?.feedback, "ok")
     }
 
     func testFinishPartialWorkoutSetsPartialFlag() throws {
@@ -70,11 +71,67 @@ final class ExerciseViewModelTests: XCTestCase {
         // Complete only one step (less than 50%)
         vm.markStepCompleted(vm.exercises[0].id)
 
-        vm.finishWorkout()
+        vm.finishWorkout(feedback: .hard)
 
         let session = try Queries.lastSession(db)
         XCTAssertNotNil(session)
         XCTAssertTrue(session?.isPartial ?? false)
+        XCTAssertEqual(session?.feedback, "hard")
+    }
+
+    func testWeightPreFillFromHistory() throws {
+        // First workout: set weights for weight exercises
+        let vm1 = ExerciseViewModel(database: db, sessionType: .a)
+        let weightExercise = vm1.exercises.first { $0.hasWeight }!
+        vm1.setWeight(weightExercise.id, weight: 14.0)
+        for exercise in vm1.exercises {
+            vm1.markStepCompleted(exercise.id)
+        }
+        vm1.finishWorkout(feedback: .ok)
+
+        // Second workout: weights should be pre-filled
+        let vm2 = ExerciseViewModel(database: db, sessionType: .a)
+        let entry = vm2.exerciseLogs[weightExercise.id]
+        XCTAssertEqual(entry?.weight, 14.0)
+    }
+
+    func testSetWeight() {
+        let vm = ExerciseViewModel(database: db, sessionType: .a)
+        let exercise = vm.exercises.first { $0.hasWeight }!
+        vm.setWeight(exercise.id, weight: 20.0)
+        XCTAssertEqual(vm.exerciseLogs[exercise.id]?.weight, 20.0)
+    }
+
+    func testMarkFailedAndClear() {
+        let vm = ExerciseViewModel(database: db, sessionType: .a)
+        let exercise = vm.exercises[0]
+
+        vm.markFailed(exercise.id, achievedValue: 7)
+        XCTAssertTrue(vm.exerciseLogs[exercise.id]?.failed ?? false)
+        XCTAssertEqual(vm.exerciseLogs[exercise.id]?.achievedValue, 7)
+        XCTAssertTrue(vm.hasAnyFailure)
+
+        vm.clearFailure(exercise.id)
+        XCTAssertFalse(vm.exerciseLogs[exercise.id]?.failed ?? true)
+        XCTAssertNil(vm.exerciseLogs[exercise.id]?.achievedValue)
+        XCTAssertFalse(vm.hasAnyFailure)
+    }
+
+    func testDefaultFeedbackBasedOnFailures() {
+        let vm = ExerciseViewModel(database: db, sessionType: .a)
+        XCTAssertEqual(vm.defaultFeedback, .ok)
+
+        vm.markFailed(vm.exercises[0].id, achievedValue: nil)
+        XCTAssertEqual(vm.defaultFeedback, .hard)
+    }
+
+    func testAbortWorkoutDoesNotLogSession() throws {
+        let vm = ExerciseViewModel(database: db, sessionType: .a)
+        vm.startTimer()
+        vm.abortWorkout()
+
+        let session = try Queries.lastSession(db)
+        XCTAssertNil(session)
     }
 
     func testDailyChallengeStepIncrementsChallengeCounter() throws {

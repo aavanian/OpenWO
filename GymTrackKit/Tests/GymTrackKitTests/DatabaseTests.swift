@@ -17,6 +17,29 @@ final class DatabaseTests: XCTestCase {
         XCTAssertTrue(tableNames.contains("exercise"))
         XCTAssertTrue(tableNames.contains("workout"))
         XCTAssertTrue(tableNames.contains("workoutExercise"))
+        XCTAssertTrue(tableNames.contains("exerciseLog"))
+    }
+
+    func testV3MigrationAddsColumns() throws {
+        let db = try AppDatabase.empty()
+
+        // Verify hasWeight column exists on exercise
+        let hasWeightCount = try db.dbWriter.read { dbConn in
+            try Int.fetchOne(dbConn, sql: "SELECT COUNT(*) FROM exercise WHERE hasWeight = 1")
+        }
+        // Rows (3), Chest press (4), Shoulder press (5), Curls (6)
+        XCTAssertEqual(hasWeightCount, 4)
+
+        // Verify feedback column exists on session (nullable)
+        try db.dbWriter.write { dbConn in
+            try dbConn.execute(
+                sql: "INSERT INTO session (sessionType, date, startedAt, durationSeconds, isPartial, feedback) VALUES ('A', '2026-02-25', '2026-02-25T08:00:00', 2400, 0, 'ok')"
+            )
+        }
+        let feedback = try db.dbWriter.read { dbConn in
+            try String?.fetchOne(dbConn, sql: "SELECT feedback FROM session ORDER BY id DESC LIMIT 1")
+        }
+        XCTAssertEqual(feedback, "ok")
     }
 
     func testSeedDataPopulated() throws {

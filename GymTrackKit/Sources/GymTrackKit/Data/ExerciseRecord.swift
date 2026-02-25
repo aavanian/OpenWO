@@ -9,6 +9,7 @@ public struct ExerciseRecord: Codable, FetchableRecord, PersistableRecord, Ident
     public var counterUnit: String
     public var defaultValue: Int
     public var isDailyChallenge: Bool
+    public var hasWeight: Bool
 
     public static var databaseTableName: String { "exercise" }
 
@@ -19,7 +20,8 @@ public struct ExerciseRecord: Codable, FetchableRecord, PersistableRecord, Ident
         advice: String = "",
         counterUnit: String,
         defaultValue: Int,
-        isDailyChallenge: Bool = false
+        isDailyChallenge: Bool = false,
+        hasWeight: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -28,6 +30,7 @@ public struct ExerciseRecord: Codable, FetchableRecord, PersistableRecord, Ident
         self.counterUnit = counterUnit
         self.defaultValue = defaultValue
         self.isDailyChallenge = isDailyChallenge
+        self.hasWeight = hasWeight
     }
 
     public var isTimed: Bool {

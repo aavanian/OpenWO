@@ -11,19 +11,20 @@ public enum Queries {
         date: String,
         startedAt: String,
         durationSeconds: Int,
-        isPartial: Bool = false
+        isPartial: Bool = false,
+        feedback: WorkoutFeedback? = nil
     ) throws -> Session {
-        var session = Session(
+        let session = Session(
             sessionType: type,
             date: date,
             startedAt: startedAt,
             durationSeconds: durationSeconds,
-            isPartial: isPartial
+            isPartial: isPartial,
+            feedback: feedback?.rawValue
         )
-        try db.dbWriter.write { dbConn in
-            try session.insert(dbConn)
+        return try db.dbWriter.write { dbConn in
+            try session.inserted(dbConn)
         }
-        return session
     }
 
     public static func lastSession(_ db: AppDatabase) throws -> Session? {
@@ -150,7 +151,7 @@ public enum Queries {
                 dbConn,
                 sql: """
                     SELECT e.id, e.name, e.description, e.advice, e.counterUnit,
-                           e.defaultValue, e.isDailyChallenge,
+                           e.defaultValue, e.isDailyChallenge, e.hasWeight,
                            we.id AS weId, we.workoutId, we.exerciseId, we.position,
                            we.counterValue, we.counterLabel, we.restSeconds, we.sets
                     FROM workoutExercise we
@@ -168,7 +169,8 @@ public enum Queries {
                     advice: row["advice"],
                     counterUnit: row["counterUnit"],
                     defaultValue: row["defaultValue"],
-                    isDailyChallenge: row["isDailyChallenge"]
+                    isDailyChallenge: row["isDailyChallenge"],
+                    hasWeight: row["hasWeight"]
                 )
                 let we = WorkoutExercise(
                     id: row["weId"],
@@ -182,6 +184,57 @@ public enum Queries {
                 )
                 return (exercise, we)
             }
+        }
+    }
+
+    // MARK: - Exercise Logs
+
+    /// Bulk insert exercise log entries for a session
+    public static func insertExerciseLogs(
+        _ db: AppDatabase,
+        sessionId: Int64,
+        logs: [ExerciseLog]
+    ) throws {
+        try db.dbWriter.write { dbConn in
+            for var log in logs {
+                log.sessionId = sessionId
+                try log.insert(dbConn)
+            }
+        }
+    }
+
+    /// Fetch the most recent weight per exercise for a given workout.
+    /// Looks across all workouts sharing the same exerciseId so that
+    /// weights carry over (e.g., Day A rows → Day C rows).
+    /// Returns a mapping of workoutExerciseId → last weight used.
+    public static func lastWeights(
+        _ db: AppDatabase,
+        forWorkoutId workoutId: Int64
+    ) throws -> [Int64: Double] {
+        try db.dbWriter.read { dbConn in
+            let rows = try Row.fetchAll(
+                dbConn,
+                sql: """
+                    SELECT cur.id AS weId, el.weight
+                    FROM workoutExercise cur
+                    JOIN workoutExercise any_we ON any_we.exerciseId = cur.exerciseId
+                    JOIN exerciseLog el ON el.workoutExerciseId = any_we.id
+                    JOIN session s ON s.id = el.sessionId
+                    WHERE cur.workoutId = ?
+                      AND el.weight IS NOT NULL
+                    ORDER BY s.id DESC
+                    """,
+                arguments: [workoutId]
+            )
+            var result: [Int64: Double] = [:]
+            for row in rows {
+                let weId: Int64 = row["weId"]
+                // First row per weId is the most recent (ORDER BY s.id DESC)
+                if result[weId] == nil {
+                    result[weId] = row["weight"]
+                }
+            }
+            return result
         }
     }
 }
