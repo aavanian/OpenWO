@@ -29,7 +29,7 @@ struct ExerciseStepCard: View {
 
                 Spacer()
 
-                if !isCompleted && exercise.sets == nil && !exercise.isTimed {
+                if !isCompleted && exercise.sets == nil {
                     Button("Done") {
                         onComplete()
                     }
@@ -49,23 +49,22 @@ struct ExerciseStepCard: View {
         if let sets = exercise.sets {
             if exercise.isTimed {
                 // Timed exercise with sets (e.g. Plank: 2 sets × 30-45 sec)
-                VStack(alignment: .leading, spacing: 6) {
+                HStack {
                     TimerView(label: exercise.reps)
+                    Spacer()
                     SetTracker(totalSets: sets, onAllCompleted: onComplete)
                 }
             } else {
-                SetTracker(totalSets: sets, onAllCompleted: onComplete)
+                HStack {
+                    Text(exercise.reps)
+                        .font(.subheadline)
+                    Spacer()
+                    SetTracker(totalSets: sets, onAllCompleted: onComplete)
+                }
             }
         } else if exercise.isTimed {
             // Pure timed exercise (e.g. Cardio warm-up: 10 min)
-            VStack(alignment: .leading, spacing: 6) {
-                TimerView(label: exercise.reps)
-                Button("Done") {
-                    onComplete()
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-            }
+            TimerView(label: exercise.reps)
         } else {
             Text(exercise.reps)
                 .font(.subheadline)

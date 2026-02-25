@@ -7,22 +7,17 @@ struct WorkoutCard: View {
 
     var body: some View {
         Button(action: action) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(sessionType.shortLabel)
-                        .font(.title2.bold())
-                    Text(sessionType.subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                Spacer()
-                if isNext {
-                    Image(systemName: "arrow.right.circle.fill")
-                        .font(.title2)
-                }
+            VStack(spacing: 4) {
+                Text(sessionType.shortLabel)
+                    .font(.title2.bold())
+                Text(sessionType.subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
             }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 4)
+            .frame(maxWidth: .infinity)
             .background(isNext ? Color.accentColor.opacity(0.15) : Color.secondaryGroupedBackground)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
