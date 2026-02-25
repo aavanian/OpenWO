@@ -13,29 +13,29 @@ Three new tables, added via a **"v2" migration**:
 
 ### Table: `exercise`
 
-| Column           | Type    | Notes                                  |
-|------------------|---------|----------------------------------------|
-| id               | INTEGER | PK AUTOINCREMENT                       |
-| name             | TEXT    | NOT NULL — e.g. "Push-ups"             |
+| Column           | Type    | Notes                                     |
+|------------------|---------|-------------------------------------------|
+| id               | INTEGER | PK AUTOINCREMENT                          |
+| name             | TEXT    | NOT NULL — e.g. "Push-ups"               |
 | description      | TEXT    | NOT NULL DEFAULT '' — longer explanation |
-| advice           | TEXT    | NOT NULL DEFAULT '' — form cue         |
-| counterUnit      | TEXT    | NOT NULL — `"reps"` or `"timer"`       |
-| defaultValue     | INTEGER | NOT NULL — reps count or seconds       |
-| isDailyChallenge | BOOLEAN | NOT NULL DEFAULT 0                     |
+| advice           | TEXT    | NOT NULL DEFAULT '' — form cue           |
+| counterUnit      | TEXT    | NOT NULL — `"reps"` or `"timer"`         |
+| defaultValue     | INTEGER | NOT NULL — reps count or seconds         |
+| isDailyChallenge | BOOLEAN | NOT NULL DEFAULT 0                        |
 
 ### Table: `workout`
 
 | Column      | Type    | Notes                              |
 |-------------|---------|------------------------------------|
 | id          | INTEGER | PK AUTOINCREMENT                   |
-| name        | TEXT    | NOT NULL — e.g. "Day A"            |
+| name        | TEXT    | NOT NULL — e.g. "Day A"           |
 | description | TEXT    | NOT NULL DEFAULT ''                |
 
 ### Table: `workoutExercise` (join / ordering)
 
-| Column       | Type    | Notes                                                    |
-|--------------|---------|----------------------------------------------------------|
-| id           | INTEGER | PK AUTOINCREMENT                                         |
+| Column       | Type    | Notes                                                     |
+|--------------|---------|-----------------------------------------------------------|
+| id           | INTEGER | PK AUTOINCREMENT                                          |
 | workoutId    | INTEGER | NOT NULL, FK → workout(id)                               |
 | exerciseId   | INTEGER | NOT NULL, FK → exercise(id)                              |
 | position     | INTEGER | NOT NULL — ordering within the workout (0-based)         |
@@ -50,14 +50,14 @@ Three new tables, added via a **"v2" migration**:
 
 Current `Exercise` struct fields → new schema:
 
-| Current field     | New location                                                      |
-|-------------------|-------------------------------------------------------------------|
-| `name`            | `exercise.name`                                                   |
+| Current field     | New location                                                        |
+|-------------------|---------------------------------------------------------------------|
+| `name`            | `exercise.name`                                                     |
 | `instruction`     | `exercise.advice` (form cues go here; longer text → `description`) |
-| `sets`            | `workoutExercise.sets`                                            |
-| `reps` (String)   | Derived from `counterUnit` + `counterValue` (or `counterLabel`)   |
-| `isTimed`         | Derived: `exercise.counterUnit == "timer"`                        |
-| `isDailyChallenge`| `exercise.isDailyChallenge`                                       |
+| `sets`            | `workoutExercise.sets`                                              |
+| `reps` (String)   | Derived from `counterUnit` + `counterValue` (or `counterLabel`)     |
+| `isTimed`         | Derived: `exercise.counterUnit == "timer"`                          |
+| `isDailyChallenge`| `exercise.isDailyChallenge`                                         |
 
 Example seed data (from the existing `WorkoutPlan`):
 
