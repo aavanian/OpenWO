@@ -3,6 +3,7 @@ import Combine
 
 struct TimerView: View {
     let label: String
+    var stopped: Bool = false
 
     @StateObject private var state = TimerState()
 
@@ -31,6 +32,11 @@ struct TimerView: View {
                     .font(.title3)
             }
             .buttonStyle(.plain)
+        }
+        .onChange(of: stopped) { newValue in
+            if newValue && state.isRunning {
+                state.pause()
+            }
         }
     }
 

@@ -79,7 +79,7 @@ struct ExerciseStepCard: View {
         if let sets = exercise.sets {
             if exercise.isTimed {
                 HStack {
-                    TimerView(label: exercise.reps)
+                    TimerView(label: exercise.reps, stopped: isCompleted)
                     Spacer()
                     SetTracker(totalSets: sets, onAllCompleted: onComplete)
                 }
@@ -92,7 +92,7 @@ struct ExerciseStepCard: View {
                 }
             }
         } else if exercise.isTimed {
-            TimerView(label: exercise.reps)
+            TimerView(label: exercise.reps, stopped: isCompleted)
         } else {
             Text(exercise.reps)
                 .font(.subheadline)
