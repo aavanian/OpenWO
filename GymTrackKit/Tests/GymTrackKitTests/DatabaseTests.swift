@@ -61,4 +61,48 @@ final class DatabaseTests: XCTestCase {
         // Day A: 9 + Day B: 7 + Day C: 7 = 23
         XCTAssertEqual(weCount, 23)
     }
+
+    func testV4MigrationMovesFieldsToWorkoutExercise() throws {
+        let db = try AppDatabase.empty()
+
+        // Verify counterUnit, isDailyChallenge, hasWeight exist on workoutExercise
+        let weHasWeight = try db.dbWriter.read { dbConn in
+            try Int.fetchOne(dbConn, sql: "SELECT COUNT(*) FROM workoutExercise WHERE hasWeight = 1")
+        }
+        XCTAssertGreaterThan(weHasWeight ?? 0, 0)
+
+        // Verify daily challenge flag migrated
+        let weDailyChallenge = try db.dbWriter.read { dbConn in
+            try Int.fetchOne(dbConn, sql: "SELECT COUNT(*) FROM workoutExercise WHERE isDailyChallenge = 1")
+        }
+        // 3 workouts each have 1 daily challenge exercise
+        XCTAssertEqual(weDailyChallenge, 3)
+
+        // Verify no NULL counterValues remain
+        let nullCounterValues = try db.dbWriter.read { dbConn in
+            try Int.fetchOne(dbConn, sql: "SELECT COUNT(*) FROM workoutExercise WHERE counterValue IS NULL")
+        }
+        XCTAssertEqual(nullCounterValues, 0)
+
+        // Verify instructions column on exercise (plain string via advice → instructions)
+        let instructions = try db.dbWriter.read { dbConn in
+            try String.fetchOne(dbConn, sql: "SELECT instructions FROM exercise WHERE name = 'Plank'")
+        }
+        XCTAssertEqual(instructions, "Hips level")
+    }
+
+    func testV5MigrationAddsTip() throws {
+        let db = try AppDatabase.empty()
+
+        let tip = try db.dbWriter.read { dbConn in
+            try String.fetchOne(dbConn, sql: "SELECT tip FROM exercise WHERE name = 'Plank'")
+        }
+        XCTAssertEqual(tip, "Hips level")
+
+        // Verify all exercises have a non-empty tip
+        let emptyTipCount = try db.dbWriter.read { dbConn in
+            try Int.fetchOne(dbConn, sql: "SELECT COUNT(*) FROM exercise WHERE tip = ''")
+        }
+        XCTAssertEqual(emptyTipCount, 0)
+    }
 }

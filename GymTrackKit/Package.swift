@@ -21,7 +21,10 @@ let package = Package(
                 #else
                 return []
                 #endif
-            }()
+            }(),
+            resources: [
+                .process("Resources"),
+            ]
         ),
         .testTarget(
             name: "GymTrackKitTests",

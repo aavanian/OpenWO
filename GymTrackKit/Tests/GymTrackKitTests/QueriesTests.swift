@@ -250,7 +250,7 @@ final class QueriesTests: XCTestCase {
 
         // Verify first exercise is the warm-up
         XCTAssertEqual(entries[0].0.name, "Cardio warm-up (cycling)")
-        XCTAssertEqual(entries[0].0.counterUnit, "timer")
+        XCTAssertEqual(entries[0].1.counterUnit, "timer")
     }
 
     func testExercisesForWorkoutDayB() throws {

@@ -1,0 +1,273 @@
+[
+  {
+    "name": "Day A",
+    "description": "Upper Strength, 40-45 min",
+    "exercises": [
+      {
+        "exerciseName": "Cardio warm-up (cycling)",
+        "position": 0,
+        "counterUnit": "timer",
+        "counterValue": 600,
+        "counterLabel": "10 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Daily Challenge — squats + push-ups",
+        "position": 1,
+        "counterUnit": "reps",
+        "counterValue": 20,
+        "counterLabel": "10 + 10 reps",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": true,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Dumbbell rows (pull)",
+        "position": 2,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": "10 reps / side",
+        "restSeconds": 30,
+        "sets": 4,
+        "isDailyChallenge": false,
+        "hasWeight": true
+      },
+      {
+        "exerciseName": "Dumbbell chest press (push)",
+        "position": 3,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": null,
+        "restSeconds": 30,
+        "sets": 4,
+        "isDailyChallenge": false,
+        "hasWeight": true
+      },
+      {
+        "exerciseName": "Shoulder press (push)",
+        "position": 4,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": null,
+        "restSeconds": 30,
+        "sets": 3,
+        "isDailyChallenge": false,
+        "hasWeight": true
+      },
+      {
+        "exerciseName": "Bicep curls (pull)",
+        "position": 5,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": null,
+        "restSeconds": 30,
+        "sets": 3,
+        "isDailyChallenge": false,
+        "hasWeight": true
+      },
+      {
+        "exerciseName": "Plank",
+        "position": 6,
+        "counterUnit": "timer",
+        "counterValue": 45,
+        "counterLabel": "30–45 sec hold",
+        "restSeconds": 30,
+        "sets": 2,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Dead bugs",
+        "position": 7,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": null,
+        "restSeconds": 30,
+        "sets": 2,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Stretch",
+        "position": 8,
+        "counterUnit": "timer",
+        "counterValue": 300,
+        "counterLabel": "5 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      }
+    ]
+  },
+  {
+    "name": "Day B",
+    "description": "Cardio + Core, 45-50 min",
+    "exercises": [
+      {
+        "exerciseName": "Cardio warm-up (cycling)",
+        "position": 0,
+        "counterUnit": "timer",
+        "counterValue": 300,
+        "counterLabel": "5 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Daily Challenge — squats + push-ups",
+        "position": 1,
+        "counterUnit": "reps",
+        "counterValue": 20,
+        "counterLabel": "10 + 10 reps",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": true,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Main cardio block (cycling)",
+        "position": 2,
+        "counterUnit": "timer",
+        "counterValue": 1200,
+        "counterLabel": "20 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Plank",
+        "position": 3,
+        "counterUnit": "timer",
+        "counterValue": 45,
+        "counterLabel": "30–45 sec hold",
+        "restSeconds": 30,
+        "sets": 3,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Dead bugs",
+        "position": 4,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": "10 reps / side",
+        "restSeconds": 30,
+        "sets": 3,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Leg raises",
+        "position": 5,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": null,
+        "restSeconds": 30,
+        "sets": 3,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Flexibility & mobility",
+        "position": 6,
+        "counterUnit": "timer",
+        "counterValue": 600,
+        "counterLabel": "10 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      }
+    ]
+  },
+  {
+    "name": "Day C",
+    "description": "Mixed / Maintenance, 35-40 min",
+    "exercises": [
+      {
+        "exerciseName": "Cardio warm-up (cycling)",
+        "position": 0,
+        "counterUnit": "timer",
+        "counterValue": 900,
+        "counterLabel": "15 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Daily Challenge — squats + push-ups",
+        "position": 1,
+        "counterUnit": "reps",
+        "counterValue": 20,
+        "counterLabel": "10 + 10 reps",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": true,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Dumbbell rows (pull)",
+        "position": 2,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": "10 reps / side",
+        "restSeconds": 30,
+        "sets": 2,
+        "isDailyChallenge": false,
+        "hasWeight": true
+      },
+      {
+        "exerciseName": "Dumbbell chest press (push)",
+        "position": 3,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": null,
+        "restSeconds": 30,
+        "sets": 2,
+        "isDailyChallenge": false,
+        "hasWeight": true
+      },
+      {
+        "exerciseName": "Plank",
+        "position": 4,
+        "counterUnit": "timer",
+        "counterValue": 40,
+        "counterLabel": "30–40 sec",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Dead bugs",
+        "position": 5,
+        "counterUnit": "reps",
+        "counterValue": 10,
+        "counterLabel": "10 reps / side",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      },
+      {
+        "exerciseName": "Stretch",
+        "position": 6,
+        "counterUnit": "timer",
+        "counterValue": 420,
+        "counterLabel": "7 min",
+        "restSeconds": 0,
+        "sets": 1,
+        "isDailyChallenge": false,
+        "hasWeight": false
+      }
+    ]
+  }
+]

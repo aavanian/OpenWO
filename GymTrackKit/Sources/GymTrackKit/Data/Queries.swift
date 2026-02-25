@@ -141,7 +141,7 @@ public enum Queries {
 
     /// Fetch exercises for a workout, ordered by position.
     /// Returns tuples of (ExerciseRecord, WorkoutExercise) so callers have both
-    /// the exercise definition and the per-workout overrides.
+    /// the exercise catalog data and the per-workout programming.
     public static func exercisesForWorkout(
         _ db: AppDatabase,
         workoutId: Int64
@@ -150,10 +150,10 @@ public enum Queries {
             let rows = try Row.fetchAll(
                 dbConn,
                 sql: """
-                    SELECT e.id, e.name, e.description, e.advice, e.counterUnit,
-                           e.defaultValue, e.isDailyChallenge, e.hasWeight,
+                    SELECT e.id, e.name, e.description, e.instructions, e.tip,
                            we.id AS weId, we.workoutId, we.exerciseId, we.position,
-                           we.counterValue, we.counterLabel, we.restSeconds, we.sets
+                           we.counterUnit, we.counterValue, we.counterLabel,
+                           we.restSeconds, we.sets, we.isDailyChallenge, we.hasWeight
                     FROM workoutExercise we
                     JOIN exercise e ON e.id = we.exerciseId
                     WHERE we.workoutId = ?
@@ -166,21 +166,21 @@ public enum Queries {
                     id: row["id"],
                     name: row["name"],
                     description: row["description"],
-                    advice: row["advice"],
-                    counterUnit: row["counterUnit"],
-                    defaultValue: row["defaultValue"],
-                    isDailyChallenge: row["isDailyChallenge"],
-                    hasWeight: row["hasWeight"]
+                    instructions: row["instructions"],
+                    tip: row["tip"]
                 )
                 let we = WorkoutExercise(
                     id: row["weId"],
                     workoutId: row["workoutId"],
                     exerciseId: row["exerciseId"],
                     position: row["position"],
+                    counterUnit: row["counterUnit"],
                     counterValue: row["counterValue"],
                     counterLabel: row["counterLabel"],
                     restSeconds: row["restSeconds"],
-                    sets: row["sets"]
+                    sets: row["sets"],
+                    isDailyChallenge: row["isDailyChallenge"],
+                    hasWeight: row["hasWeight"]
                 )
                 return (exercise, we)
             }

@@ -9,19 +9,18 @@ public enum WorkoutPlan {
         guard let workoutId = workout.id else { return [] }
         let rows = try Queries.exercisesForWorkout(database, workoutId: workoutId)
         return rows.map { record, we in
-            let value = we.counterValue ?? record.defaultValue
-            let repsLabel = we.counterLabel ?? Self.formatCounter(unit: record.counterUnit, value: value)
+            let repsLabel = we.counterLabel ?? Self.formatCounter(unit: we.counterUnit, value: we.counterValue)
             return Exercise(
                 id: "\(we.workoutId)-\(we.position)",
                 name: record.name,
-                instruction: record.advice,
+                instruction: record.tip,
                 sets: we.sets > 1 ? we.sets : nil,
                 reps: repsLabel,
-                isDailyChallenge: record.isDailyChallenge,
-                isTimed: record.isTimed,
-                hasWeight: record.hasWeight,
+                isDailyChallenge: we.isDailyChallenge,
+                isTimed: we.isTimed,
+                hasWeight: we.hasWeight,
                 workoutExerciseId: we.id!,
-                counterSeconds: record.isTimed ? value : nil
+                counterSeconds: we.isTimed ? we.counterValue : nil
             )
         }
     }
