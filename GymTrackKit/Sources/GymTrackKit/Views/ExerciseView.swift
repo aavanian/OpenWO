@@ -7,34 +7,58 @@ struct ExerciseView: View {
     @State private var showPartialConfirmation = false
     @State private var showAbortConfirmation = false
     @State private var showFeedbackSheet = false
+    @State private var expandedExerciseId: String?
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(viewModel.exercises) { exercise in
-                            ExerciseStepCard(
-                                exercise: exercise,
-                                isCompleted: viewModel.completedSteps.contains(exercise.id),
-                                logEntry: viewModel.exerciseLogs[exercise.id],
-                                onComplete: {
-                                    viewModel.markStepCompleted(exercise.id)
-                                    Haptics.light()
-                                },
-                                onWeightChanged: { weight in
-                                    viewModel.setWeight(exercise.id, weight: weight)
-                                },
-                                onFailed: { achieved in
-                                    viewModel.markFailed(exercise.id, achievedValue: achieved)
-                                },
-                                onClearFailure: {
-                                    viewModel.clearFailure(exercise.id)
-                                }
-                            )
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 12) {
+                            ForEach(viewModel.exercises) { exercise in
+                                ExerciseStepCard(
+                                    exercise: exercise,
+                                    isCompleted: viewModel.completedSteps.contains(exercise.id),
+                                    isExpanded: exercise.id == expandedExerciseId,
+                                    logEntry: viewModel.exerciseLogs[exercise.id],
+                                    onComplete: {
+                                        viewModel.markStepCompleted(exercise.id)
+                                        Haptics.light()
+                                    },
+                                    onWeightChanged: { weight in
+                                        viewModel.setWeight(exercise.id, weight: weight)
+                                    },
+                                    onFailed: { achieved in
+                                        viewModel.markFailed(exercise.id, achievedValue: achieved)
+                                    },
+                                    onClearFailure: {
+                                        viewModel.clearFailure(exercise.id)
+                                    },
+                                    onTap: {
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            expandedExerciseId = exercise.id
+                                        }
+                                    }
+                                )
+                                .id(exercise.id)
+                            }
+                        }
+                        .padding()
+                    }
+                    #if os(iOS)
+                    .scrollDismissesKeyboard(.interactively)
+                    #endif
+                    .onChange(of: viewModel.completedSteps) { _ in
+                        let nextIncomplete = viewModel.exercises.first {
+                            !viewModel.completedSteps.contains($0.id)
+                        }
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            expandedExerciseId = nextIncomplete?.id
+                            if let nextId = nextIncomplete?.id {
+                                proxy.scrollTo(nextId, anchor: .top)
+                            }
                         }
                     }
-                    .padding()
                 }
 
                 finishButton
@@ -62,6 +86,9 @@ struct ExerciseView: View {
             }
             .onAppear {
                 viewModel.startTimer()
+                expandedExerciseId = viewModel.exercises.first {
+                    !viewModel.completedSteps.contains($0.id)
+                }?.id
             }
             .alert("Log as partial session?", isPresented: $showPartialConfirmation) {
                 Button("Yes") {

@@ -53,28 +53,7 @@ struct DailyChallengeCard: View {
                 Button("Cancel", role: .cancel) {}
             }
 
-            Divider()
-
-            HStack {
-                statItem(label: "Streak", value: "\(viewModel.challengeStreak)d")
-                Spacer()
-                statItem(label: "Past 365d", value: "\(viewModel.challengeDaysPast365)")
-                Spacer()
-                statItem(label: "YTD", value: "\(viewModel.challengeDaysYTD)")
-            }
         }
         .padding()
-        .background(Color.secondaryGroupedBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func statItem(label: String, value: String) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.subheadline.bold())
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
     }
 }

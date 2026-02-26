@@ -17,8 +17,7 @@ struct HomeView: View {
                 VStack(spacing: 20) {
                     streakHeader
                     workoutButtons
-                    DailyChallengeCard(viewModel: viewModel)
-                    QuickStatsRow(viewModel: viewModel)
+                    statsCard
                 }
                 .padding()
             }
@@ -82,6 +81,57 @@ struct HomeView: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    private var statsCard: some View {
+        VStack(spacing: 0) {
+            DailyChallengeCard(viewModel: viewModel)
+            Divider().padding(.horizontal)
+            Grid(alignment: .top) {
+                GridRow {
+                    statCell(label: "Streak", value: "\(viewModel.challengeStreak)d")
+                    statCell(label: "Past 365d", value: "\(viewModel.challengeDaysPast365)")
+                    statCell(label: "YTD", value: "\(viewModel.challengeDaysYTD)")
+                }
+                Divider()
+                GridRow {
+                    statCell(label: "This week", value: "\(viewModel.sessionsThisWeek)")
+                    statCell(label: "This month", value: "\(viewModel.sessionsThisMonth)")
+                    lastSessionCell
+                }
+            }
+            .padding()
+        }
+        .background(Color.secondaryGroupedBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func statCell(label: String, value: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.subheadline.bold())
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var lastSessionCell: some View {
+        VStack(spacing: 2) {
+            if let last = viewModel.lastSession, let type = last.type {
+                Text(type.shortLabel)
+                    .font(.subheadline.bold())
+                Text(last.date)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("—")
+                    .font(.subheadline.bold())
+                Text("Last session")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 
     private var workoutButtons: some View {

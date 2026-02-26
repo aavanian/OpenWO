@@ -3,11 +3,13 @@ import SwiftUI
 struct ExerciseStepCard: View {
     let exercise: Exercise
     let isCompleted: Bool
+    let isExpanded: Bool
     let logEntry: ExerciseLogEntry?
     let onComplete: () -> Void
     let onWeightChanged: (Double?) -> Void
     let onFailed: (Int?) -> Void
     let onClearFailure: () -> Void
+    let onTap: () -> Void
 
     @State private var weightText: String = ""
     @State private var showFailedInput: Bool = false
@@ -28,30 +30,37 @@ struct ExerciseStepCard: View {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
                 }
-            }
-
-            if !exercise.instruction.isEmpty {
-                Text(exercise.instruction)
+                Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
 
-            HStack {
-                exerciseControls
-
-                Spacer()
-
-                if !isCompleted && exercise.sets == nil {
-                    Button("Done") {
-                        onComplete()
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+            if isExpanded {
+                if !exercise.instruction.isEmpty {
+                    Text(exercise.instruction)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-            }
 
-            if exercise.hasWeight || !isCompleted {
-                exerciseLogControls
+                HStack {
+                    exerciseControls
+
+                    Spacer()
+
+                    if !isCompleted && exercise.sets == nil {
+                        Button("Done") {
+                            onComplete()
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                }
+
+                if exercise.hasWeight || !isCompleted {
+                    exerciseLogControls
+                }
             }
         }
         .padding()
