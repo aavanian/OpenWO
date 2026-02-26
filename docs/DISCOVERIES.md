@@ -20,6 +20,16 @@ When building a Swift Package targeting both iOS and macOS (for `swift test` on 
 
 Run `xcodegen generate` from the `GymTrackApp/` directory to regenerate `.xcodeproj`. The generated project is gitignored.
 
+## iCloud Documents + GRDB
+
+- iCloud Documents syncs files via atomic rename (replace old file with downloaded version). An open GRDB `DatabaseQueue` holds a file descriptor to the old inode and won't see the replacement. A full reload (dealloc old queue, open new one) is required.
+- `NSFileCoordinator` should wrap the initial database open to prevent iCloud from replacing the file mid-open.
+- `NSMetadataQuery` with `NSMetadataQueryUbiquitousDocumentsScope` detects remote file updates.
+- `PRAGMA journal_mode = DELETE` avoids WAL/SHM companion files that break iCloud sync (iCloud treats each file independently; the WAL and main DB can get out of sync).
+- The iCloud `Documents/` subdirectory inside the ubiquity container is what Files.app exposes. Files outside it are not user-visible.
+- `UIFileSharingEnabled` + `LSSupportsOpeningDocumentsInPlace` make the app's local Documents directory visible in Files.app under "On My iPhone".
+- No locking mechanism exists for concurrent access from multiple devices. Sequential usage (phone, then Mac) is the expected pattern. Last writer wins.
+
 ## iOS Simulator platform
 
 Xcode 26 requires separately downloading the iOS platform SDK via `xcodebuild -downloadPlatform iOS` or Xcode > Settings > Components. Without it, `xcodebuild` fails with "iOS 26.x is not installed" even when a simulator runtime exists.

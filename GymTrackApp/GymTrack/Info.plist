@@ -24,6 +24,10 @@
 	<string>GymTrack can read your health data to show workout history.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>GymTrack records your workouts in Apple Health so they count toward your activity rings.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
