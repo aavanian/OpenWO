@@ -20,7 +20,11 @@ targets:
       base:
         INFOPLIST_FILE: OpenWO/Info.plist
         CODE_SIGN_ENTITLEMENTS: OpenWO/OpenWO.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         PRODUCT_BUNDLE_IDENTIFIER: com.avanian.openwo
+        DEVELOPMENT_TEAM: 57YB623TNL
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.healthcare-fitness
+        INFOPLIST_KEY_CFBundleDisplayName: OpenWO
     entitlements:
       path: OpenWO/OpenWO.entitlements
       properties:
@@ -46,3 +50,21 @@ targets:
       - OpenWOTests
     dependencies:
       - target: OpenWO
+
+schemes:
+  OpenWO:
+    build:
+      targets:
+        OpenWO: all
+    run:
+      config: Debug
+      environmentVariables:
+        OS_ACTIVITY_MODE: disable
+    test:
+      config: Debug
+      targets:
+        - OpenWOTests
+    profile:
+      config: Release
+    archive:
+      config: Release
