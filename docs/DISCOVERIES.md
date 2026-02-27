@@ -29,6 +29,7 @@ Run `xcodegen generate` from the `GymTrackApp/` directory to regenerate `.xcodep
 - The iCloud `Documents/` subdirectory inside the ubiquity container is what Files.app exposes. Files outside it are not user-visible.
 - `UIFileSharingEnabled` + `LSSupportsOpeningDocumentsInPlace` make the app's local Documents directory visible in Files.app under "On My iPhone".
 - No locking mechanism exists for concurrent access from multiple devices. Sequential usage (phone, then Mac) is the expected pattern. Last writer wins.
+- `NSUbiquitousContainers` in Info.plist is required for the iCloud container to be browseable in Files.app. However, it may only take effect with App Store/TestFlight builds, not development-signed builds. The iCloud container itself works fine in dev (data syncs), but Files.app visibility needs verification via TestFlight.
 
 ## iOS Simulator platform
 
