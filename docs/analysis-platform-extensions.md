@@ -59,15 +59,41 @@ Phone (HomeView)                    Watch
 
 ### HealthKit on watch
 
-The existing `HealthKitManager` uses `HKWorkoutBuilder`, which is phone-only.
-For the watch, use `HKWorkoutSession` + `HKLiveWorkoutBuilder` instead. This
-would be a separate `WatchHealthKitManager` conforming to a shared protocol.
+The watch should own the `HKWorkoutSession` — this gives full sensor access
+(high-frequency heart rate every few seconds, active calories with workout-
+specific algorithms, wrist detection).
+
+**Recommended approach: watch-owned workout, not mirroring.**
+
+- The watch starts its own `HKWorkoutSession` + `HKLiveWorkoutBuilder` when
+  notified by the phone that a workout has started.
+- The phone drops its own `HKWorkoutSession` when the watch is paired and
+  reachable, to avoid duplicate workouts in HealthKit.
+- On iOS 26+, the phone currently uses `HKWorkoutSession` for a Live Activity
+  indicator. When the watch companion is active, the phone should fall back to
+  silent `HKWorkoutBuilder` (or skip HealthKit entirely) and let the watch
+  handle it.
+
+**Why not mirroring (`HKWorkoutSession.mirror(to:)`)?**
+
+- Mirroring is for controlling a single shared session across devices (e.g.,
+  start on phone, mirror to watch). It adds complexity.
+- Since GymTrack's primary UI is phone-based (exercise steps, weight logging),
+  and the watch is a follow-along companion, two coordinated sessions via
+  `WatchConnectivity` is simpler and gives the same end result.
+- If mirroring becomes desirable later (e.g., seamless handoff mid-workout),
+  it can be added incrementally.
+
+**Without a watch companion:** the phone's `HKWorkoutSession` (iOS 26+) does
+show a Dynamic Island indicator, but the watch won't display anything and heart
+rate sampling stays at background rate (~every 10 minutes). HealthKit associates
+any samples that overlap the workout time window, but data quality is low.
 
 ### Project setup
 
 - Add a watchOS target in `project.yml` (XcodeGen supports
   `type: application.watchapp2`).
-- Minimum watchOS 9 (aligns with iOS 16 pairing).
+- Minimum watchOS 12 (aligns with iOS 26 pairing and `HKWorkoutSession` APIs).
 - New SPM target or shared source set for the watch views.
 
 ### Risks
@@ -76,6 +102,8 @@ would be a separate `WatchHealthKitManager` conforming to a shared protocol.
   backgrounded. Need robust error handling and a "waiting for phone" state.
 - Watch screen real estate is very limited; complex exercises with many fields
   will need careful layout.
+- Coordinating workout start/stop between phone and watch requires careful
+  state management to avoid duplicate or orphaned HealthKit workouts.
 
 ---
 
@@ -155,11 +183,12 @@ explore Siri integration.
 ### Foundation Models framework (iOS 26+)
 
 Apple's on-device Foundation Models framework (`FoundationModels.framework`)
-requires iOS 26, which conflicts with the project's iOS 16 minimum target.
+requires iOS 26. The project's minimum target is iOS 18, so this needs an
+`#available(iOS 26, *)` guard.
 
 **Recommendation:** Do not adopt Foundation Models as a primary feature. Instead:
 
-1. **Ship data export first** (works on iOS 16+).
+1. **Ship data export first** (works on iOS 18+).
 2. **Optionally add Foundation Models** behind `#available(iOS 26, *)` as a
    progressive enhancement for users on the latest OS.
 

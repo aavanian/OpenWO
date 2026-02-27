@@ -51,7 +51,7 @@ try await builder.finishWorkout()
 
 - **Platform guard:** HealthKit is iOS-only. Must be guarded with `#if canImport(HealthKit)` for macOS builds and tests.
 - **Authorization is optional:** The app must work without HealthKit permission. Authorization is async and can be denied — treat it as graceful degradation.
-- **API choice:** `HKWorkoutBuilder` is the modern API (iOS 12+), preferred over the deprecated `HKWorkoutSession` for phone-only apps. Apple Watch complications would use `HKWorkoutSession` instead (out of scope).
+- **API choice:** `HKWorkoutSession` (available on iPhone since iOS 17) provides a live workout with system UI (Lock Screen indicator, Dynamic Island). It uses `HKLiveWorkoutBuilder` for data collection. Plain `HKWorkoutBuilder` records workouts silently without any system indicator.
 - **Aborted workouts:** The HealthKit workout should be ended even if the user aborts — partial workouts still count for activity rings and provide useful data.
 
 ### Integration Points in Current Code

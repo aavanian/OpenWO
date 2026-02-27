@@ -2,7 +2,7 @@ name: GymTrack
 options:
   bundleIdPrefix: com.avanian
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "18.0"
 
 packages:
   GymTrackKit:

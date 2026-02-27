@@ -31,6 +31,13 @@ Run `xcodegen generate` from the `GymTrackApp/` directory to regenerate `.xcodep
 - No locking mechanism exists for concurrent access from multiple devices. Sequential usage (phone, then Mac) is the expected pattern. Last writer wins.
 - `NSUbiquitousContainers` in Info.plist is required for the iCloud container to be browseable in Files.app. However, it may only take effect with App Store/TestFlight builds, not development-signed builds. The iCloud container itself works fine in dev (data syncs), but Files.app visibility needs verification via TestFlight.
 
+## HealthKit workout visibility
+
+- `HKWorkoutBuilder` alone records workouts silently — no system UI is shown during the workout. The workout only appears in Health/Fitness after it ends.
+- `HKWorkoutSession` on iPhone provides a live workout with system indicators (Lock Screen, Dynamic Island). Despite Apple docs suggesting iOS 17+, both `HKWorkoutSession(healthStore:configuration:)` and `HKLiveWorkoutBuilder` require **iOS 26** in practice. Use `#available(iOS 26, *)` and fall back to `HKWorkoutBuilder` on older versions.
+- `HKLiveWorkoutDataSource` auto-collects heart rate, calories, etc. from Apple Watch when set on the builder.
+- In the simulator, `HKWorkoutBuilder` appears to "work" visually because the simulator doesn't distinguish live vs background workouts.
+
 ## iOS Simulator platform
 
 Xcode 26 requires separately downloading the iOS platform SDK via `xcodebuild -downloadPlatform iOS` or Xcode > Settings > Components. Without it, `xcodebuild` fails with "iOS 26.x is not installed" even when a simulator runtime exists.

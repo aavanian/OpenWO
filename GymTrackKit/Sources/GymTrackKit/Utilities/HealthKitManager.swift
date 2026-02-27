@@ -10,6 +10,7 @@ public protocol HealthKitManaging: AnyObject {
 
 public final class HealthKitManager: HealthKitManaging {
     private let healthStore = HKHealthStore()
+    private var workoutSession: AnyObject?
     private var workoutBuilder: HKWorkoutBuilder?
 
     public init() {}
@@ -30,25 +31,67 @@ public final class HealthKitManager: HealthKitManaging {
         let configuration = HKWorkoutConfiguration()
         configuration.activityType = activityType
 
-        let builder = HKWorkoutBuilder(healthStore: healthStore, configuration: configuration, device: .local())
-        try await builder.beginCollection(at: startDate)
-        self.workoutBuilder = builder
+        if #available(iOS 26, *) {
+            try await startLiveWorkout(configuration: configuration, startDate: startDate)
+        } else {
+            try await startSilentWorkout(configuration: configuration, startDate: startDate)
+        }
     }
 
     public func endWorkout(at date: Date) async throws {
-        guard let builder = workoutBuilder else { return }
-        self.workoutBuilder = nil
-
-        try await builder.endCollection(at: date)
-        try await builder.finishWorkout()
+        if #available(iOS 26, *), let session = workoutSession as? HKWorkoutSession {
+            self.workoutSession = nil
+            let builder = session.associatedWorkoutBuilder()
+            session.end()
+            try await builder.endCollection(at: date)
+            try await builder.finishWorkout()
+        } else if let builder = workoutBuilder {
+            self.workoutSession = nil
+            self.workoutBuilder = nil
+            try await builder.endCollection(at: date)
+            try await builder.finishWorkout()
+        }
     }
 
     public func discardWorkout() async {
-        guard let builder = workoutBuilder else { return }
-        self.workoutBuilder = nil
+        let now = Date()
+        if #available(iOS 26, *), let session = workoutSession as? HKWorkoutSession {
+            self.workoutSession = nil
+            let builder = session.associatedWorkoutBuilder()
+            session.end()
+            try? await builder.endCollection(at: now)
+            builder.discardWorkout()
+        } else if let builder = workoutBuilder {
+            self.workoutSession = nil
+            self.workoutBuilder = nil
+            try? await builder.endCollection(at: now)
+            builder.discardWorkout()
+        }
+    }
 
-        try? await builder.endCollection(at: Date())
-        builder.discardWorkout()
+    // MARK: - iOS 26+: Live workout with system UI indicator
+
+    @available(iOS 26, *)
+    private func startLiveWorkout(configuration: HKWorkoutConfiguration, startDate: Date) async throws {
+        let session = try HKWorkoutSession(healthStore: healthStore, configuration: configuration)
+        let builder = session.associatedWorkoutBuilder()
+        builder.dataSource = HKLiveWorkoutDataSource(
+            healthStore: healthStore,
+            workoutConfiguration: configuration
+        )
+
+        session.startActivity(with: startDate)
+        try await builder.beginCollection(at: startDate)
+
+        self.workoutSession = session
+    }
+
+    // MARK: - iOS 25 and earlier: Silent recording via HKWorkoutBuilder
+
+    private func startSilentWorkout(configuration: HKWorkoutConfiguration, startDate: Date) async throws {
+        let builder = HKWorkoutBuilder(healthStore: healthStore, configuration: configuration, device: .local())
+        try await builder.beginCollection(at: startDate)
+        self.workoutBuilder = builder
     }
 }
 #endif
