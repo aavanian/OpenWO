@@ -81,7 +81,7 @@ public enum Queries {
                 try existing.update(dbConn)
                 return existing
             } else {
-                var challenge = DailyChallenge(date: date, setsCompleted: setsCompleted)
+                let challenge = DailyChallenge(date: date, setsCompleted: setsCompleted)
                 try challenge.insert(dbConn)
                 return challenge
             }
@@ -153,10 +153,12 @@ public enum Queries {
                     SELECT e.id, e.name, e.description, e.instructions, e.tip,
                            we.id AS weId, we.workoutId, we.exerciseId, we.position,
                            we.counterUnit, we.counterValue, we.counterLabel,
-                           we.restSeconds, we.sets, we.isDailyChallenge, we.hasWeight
+                           we.restSeconds, we.sets, we.isDailyChallenge, we.hasWeight,
+                           we.isActive
                     FROM workoutExercise we
                     JOIN exercise e ON e.id = we.exerciseId
                     WHERE we.workoutId = ?
+                      AND we.isActive = 1
                     ORDER BY we.position
                     """,
                 arguments: [workoutId]
@@ -180,7 +182,8 @@ public enum Queries {
                     restSeconds: row["restSeconds"],
                     sets: row["sets"],
                     isDailyChallenge: row["isDailyChallenge"],
-                    hasWeight: row["hasWeight"]
+                    hasWeight: row["hasWeight"],
+                    isActive: row["isActive"]
                 )
                 return (exercise, we)
             }
@@ -221,6 +224,7 @@ public enum Queries {
                     JOIN exerciseLog el ON el.workoutExerciseId = any_we.id
                     JOIN session s ON s.id = el.sessionId
                     WHERE cur.workoutId = ?
+                      AND cur.isActive = 1
                       AND el.weight IS NOT NULL
                     ORDER BY s.id DESC
                     """,

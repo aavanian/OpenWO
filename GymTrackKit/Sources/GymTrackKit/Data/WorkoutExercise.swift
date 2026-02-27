@@ -13,6 +13,7 @@ public struct WorkoutExercise: Codable, FetchableRecord, PersistableRecord, Iden
     public var sets: Int
     public var isDailyChallenge: Bool
     public var hasWeight: Bool
+    public var isActive: Bool
 
     public static var databaseTableName: String { "workoutExercise" }
 
@@ -27,7 +28,8 @@ public struct WorkoutExercise: Codable, FetchableRecord, PersistableRecord, Iden
         restSeconds: Int = 30,
         sets: Int = 1,
         isDailyChallenge: Bool = false,
-        hasWeight: Bool = false
+        hasWeight: Bool = false,
+        isActive: Bool = true
     ) {
         self.id = id
         self.workoutId = workoutId
@@ -40,6 +42,7 @@ public struct WorkoutExercise: Codable, FetchableRecord, PersistableRecord, Iden
         self.sets = sets
         self.isDailyChallenge = isDailyChallenge
         self.hasWeight = hasWeight
+        self.isActive = isActive
     }
 
     public var isTimed: Bool {

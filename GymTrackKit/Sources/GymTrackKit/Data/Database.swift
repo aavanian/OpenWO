@@ -185,6 +185,15 @@ public final class AppDatabase {
             try db.execute(sql: "UPDATE exercise SET tip = instructions")
         }
 
+        migrator.registerMigration("v6") { db in
+            let columns = try db.columns(in: "workoutExercise").map(\.name)
+            if !columns.contains("isActive") {
+                try db.alter(table: "workoutExercise") { t in
+                    t.add(column: "isActive", .boolean).notNull().defaults(to: true)
+                }
+            }
+        }
+
         return migrator
     }
 
