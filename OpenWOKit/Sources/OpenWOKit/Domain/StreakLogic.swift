@@ -13,6 +13,34 @@ public enum StreakLogic {
         consecutiveStreak(dates: completedDates, today: today)
     }
 
+    /// Longest consecutive streak ever across all recorded dates.
+    public static func longestGymStreak(sessionDates: [Date]) -> Int {
+        longestStreakEver(dates: sessionDates)
+    }
+
+    /// Longest consecutive challenge streak ever across all completed dates.
+    public static func longestChallengeStreak(completedDates: [Date]) -> Int {
+        longestStreakEver(dates: completedDates)
+    }
+
+    private static func longestStreakEver(dates: [Date]) -> Int {
+        let cal = Calendar.current
+        let uniqueDays = Array(Set(dates.map { cal.startOfDay(for: $0) })).sorted()
+        guard !uniqueDays.isEmpty else { return 0 }
+        var longest = 1
+        var current = 1
+        for i in 1..<uniqueDays.count {
+            let expected = cal.date(byAdding: .day, value: 1, to: uniqueDays[i - 1])!
+            if uniqueDays[i] == expected {
+                current += 1
+                longest = max(longest, current)
+            } else {
+                current = 1
+            }
+        }
+        return longest
+    }
+
     private static func consecutiveStreak(dates: [Date], today: Date) -> Int {
         let cal = Calendar.current
         let uniqueDays = Set(dates.map { cal.startOfDay(for: $0) })
